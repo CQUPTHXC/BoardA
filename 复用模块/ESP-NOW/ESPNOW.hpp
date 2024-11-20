@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-20 11:07:05
+ * @LastEditTime: 2024-11-20 11:15:38
  */
 
 #ifndef esp_now_hpp
@@ -22,9 +22,6 @@
 //数据包密钥
 constexpr uint16_t secret_key=0xFEFE;
 
-//回调函数
-using callback_func =std::function<void(data_package)>;
-
 //广播地址
 uint8_t broadcastMacAddress[] ={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
@@ -42,6 +39,9 @@ bool is_conect = false;
 
 //数据包
 struct HXC_ESPNOW_data_pakage;
+
+//回调函数
+using callback_func =std::function<void(HXC_ESPNOW_data_pakage)>;
 
 //ESP-NOW初始化
 void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress);
@@ -167,7 +167,7 @@ void esp_now_setup(uint8_t* receive_MAC){
 
 
 //通过espnow发送数据包
-esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive_MAC=broadcastMacAddress){
+esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive_MAC){
   HXC_ESPNOW_data_pakage send_data;
   send_data.add_name(name);
   send_data.add_data(data,datalen);
