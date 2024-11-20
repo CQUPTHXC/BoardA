@@ -13,6 +13,9 @@
 #include <esp_now.h>
 #include <map>
 
+
+
+
 //发送数据包失败最大重试次数
 #define MAX_RETRY 5
 
@@ -27,6 +30,13 @@ uint8_t broadcastMacAddress[] ={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
 //记录是否收到数据包，用于判断是否连接
 bool is_conect = false;
+
+
+
+
+
+
+
 
 /*↓↓↓↓声明↓↓↓↓*/
 
@@ -44,6 +54,14 @@ void add_esp_now_callback(String package_name,callback_func func);
 
 //移除回调函数
 void remove_esp_now_callback(String package_name);
+
+
+
+
+
+
+
+
 
 
 
