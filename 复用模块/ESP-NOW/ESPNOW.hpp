@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-20 11:15:38
+ * @LastEditTime: 2024-12-03 20:40:49
  */
 
 #ifndef esp_now_hpp
@@ -20,15 +20,13 @@
 #define MAX_RETRY 5
 
 //数据包密钥
-constexpr uint16_t secret_key=0xFEFE;
+static uint16_t secret_key=0xFEFE;
 
 //广播地址
 uint8_t broadcastMacAddress[] ={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
 //记录是否收到数据包，用于判断是否连接
 bool is_conect = false;
-
-
 
 
 
@@ -43,8 +41,14 @@ struct HXC_ESPNOW_data_pakage;
 //回调函数
 using callback_func =std::function<void(HXC_ESPNOW_data_pakage)>;
 
-//ESP-NOW初始化
-void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress);
+/**
+ * @description: ESP-NOW初始化
+ * @return {*}
+ * @Author: qingmeijiupiao
+ * @param {uint8_t*} receive_MAC 接收数据的设备MAC
+ * @param {int} wifi_channel 使用的wifi信道
+ */
+void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress,int wifi_channel=0);
 
 //发送数据
 esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive_MAC=broadcastMacAddress);
@@ -55,7 +59,8 @@ void add_esp_now_callback(String package_name,callback_func func);
 //移除回调函数
 void remove_esp_now_callback(String package_name);
 
-
+//修改密钥
+void change_secret_key(uint16_t _secret_key);
 
 
 
@@ -144,16 +149,22 @@ void OnESPNOWDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
 
 
 static esp_now_peer_info_t peerInfo;
+static bool is_setup=false;
 
 //ESP-NOW初始化
-void esp_now_setup(uint8_t* receive_MAC){
+void esp_now_setup(uint8_t* receive_MAC,int wifi_channel){
+  
+  if(is_setup) return;
+  is_setup=true;
 
   WiFi.mode(WIFI_STA);
   if (esp_now_init() != ESP_OK) {
       Serial.println("ESP-NOW initialization failed");
       return;
   }
-
+  if(wifi_channel!=0){
+    peerInfo.channel = wifi_channel;
+  }
   peerInfo.ifidx = WIFI_IF_STA;
   memcpy(peerInfo.peer_addr, receive_MAC, 6);
   esp_now_add_peer(&peerInfo);
@@ -180,6 +191,10 @@ esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* re
     delay(20);
   }
   return ESP_FAIL;
+}
+
+void change_secret_key(uint16_t _secret_key){
+  secret_key=_secret_key;
 }
 
 #endif

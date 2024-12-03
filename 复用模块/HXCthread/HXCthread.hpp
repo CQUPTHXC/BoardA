@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: HXCthread库,基于FreeRTOS实现的类似std::thread线程库 
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-25 13:17:50
+ * @LastEditTime: 2024-11-27 15:19:53
  */
 #ifndef HXCTHREAD_HPP
 #define HXCTHREAD_HPP
@@ -49,7 +49,13 @@ namespace HXC {
                     this, // 传递this指针，以便在TaskWrapper中访问成员变量和函数
                     priority, // 线程优先级
                     &this->threadHandle, // 线程句柄的地址
-                    core == tskNO_AFFINITY ? tskNO_AFFINITY : core); // 核心亲和性
+                    core); // 核心亲和性
+            }
+        }
+        void stop(){ // 停止线程
+            if (this->threadHandle != nullptr) { // 如果线程句柄不为空，则删除线程。
+                vTaskDelete(this->threadHandle); // 删除线程
+                this->threadHandle = nullptr; // 清空线程句柄
             }
         }
 
