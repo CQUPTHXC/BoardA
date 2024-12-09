@@ -5,7 +5,7 @@
  */
 #include "ESPNOW.hpp"
 
-void test2(data_package package){
+void test2(HXC_ESPNOW_data_pakage package){
     Serial.println("receive test2 data");
 }
 
@@ -17,7 +17,7 @@ void setup() {
     esp_now_setup();
 
     //使用lamda添加回调
-    add_esp_now_callback("test",[](data_package package){
+    add_esp_now_callback("test",[](HXC_ESPNOW_data_pakage package){
       Serial.println("receive test data");
     })
 

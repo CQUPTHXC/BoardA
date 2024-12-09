@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-03 20:40:49
+ * @LastEditTime: 2024-12-09 16:29:06
  */
 
 #ifndef esp_now_hpp
@@ -11,55 +11,91 @@
 #include <WiFi.h>
 #include <esp_wifi.h>
 #include <esp_now.h>
+#include <functional>
 #include <map>
+#include <list>
 
-
-
+//默认数据包密钥
+#define DEFAULT_SECRET_KEY 0xFEFE
 
 //发送数据包失败最大重试次数
 #define MAX_RETRY 5
 
-//数据包密钥
-static uint16_t secret_key=0xFEFE;
-
-//广播地址
-uint8_t broadcastMacAddress[] ={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-
-//记录是否收到数据包，用于判断是否连接
-bool is_conect = false;
-
-
-
-
-
 
 /*↓↓↓↓声明↓↓↓↓*/
 
-//数据包
+//数据包结构体
 struct HXC_ESPNOW_data_pakage;
+
+//MAC地址结构体
+struct MAC_t{
+  uint8_t mac[6];
+  //构造函数,从6个字节构造
+  MAC_t(uint8_t mac1,uint8_t mac2,uint8_t mac3,uint8_t mac4,uint8_t mac5,uint8_t mac6){ mac[0]=mac1;mac[1]=mac2;mac[2]=mac3;mac[3]=mac4;mac[4]=mac5;mac[5]=mac6; }
+  //构造函数,从数组构造
+  MAC_t(uint8_t* mac){ memcpy(this->mac,mac,6); }
+  //索引运算符
+  uint8_t operator[](int i) { return mac[i]; }
+  //赋值运算符
+  void operator=(uint8_t* mac) { memcpy(this->mac,mac,6); }
+  //比较运算符
+  bool operator==(MAC_t other) { return memcmp(this->mac,other.mac,6)==0; }
+  //类型转换
+  operator uint8_t*() { return mac; }
+  operator const uint8_t*() const { return mac; }
+};
+
+//广播地址
+const MAC_t broadcastMacAddress(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF);
 
 //回调函数
 using callback_func =std::function<void(HXC_ESPNOW_data_pakage)>;
+
 
 /**
  * @description: ESP-NOW初始化
  * @return {*}
  * @Author: qingmeijiupiao
- * @param {uint8_t*} receive_MAC 接收数据的设备MAC
- * @param {int} wifi_channel 使用的wifi信道
+ * @param {MAC_t} receive_MAC 接收数据的设备MAC 默认广播地址
+ * @param {int} wifi_channel 使用的wifi信道 默认0
  */
-void esp_now_setup(uint8_t* receive_MAC=broadcastMacAddress,int wifi_channel=0);
+void esp_now_setup(MAC_t receive_MAC=broadcastMacAddress,int wifi_channel=0);
 
-//发送数据
-esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive_MAC=broadcastMacAddress);
+//添加配对MAC
+void add_esp_now_peer_mac(MAC_t mac);
 
-//添加回调函数
+//删除配对MAC
+void remove_esp_now_peer_mac(MAC_t mac);
+
+//检查是否是配对MAC
+bool is_esp_now_peer(MAC_t mac);
+
+
+/**
+ * @description: 发送经过封装的ESP-NOW数据包
+ * @return {esp_err_t} 正确返回ESP_OK
+ * @Author: qingmeijiupiao
+ * @param {String} name 数据包名称
+ * @param {uint8_t*} data 数据
+ * @param {int} datalen 数据长度
+ * @param {MAC_t} receive_MAC 接收数据的设备MAC 默认广播地址
+ */
+esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,MAC_t receive_MAC=broadcastMacAddress);
+
+
+/**
+ * @description: 添加回调函数,回调函数会在接收到数据包时自动运行
+ * @return {*}
+ * @Author: qingmeijiupiao
+ * @param {String} package_name 数据包名称
+ * @param {callback_func} func 回调函数,可使用函数指针或者lambda
+ */
 void add_esp_now_callback(String package_name,callback_func func);
 
 //移除回调函数
 void remove_esp_now_callback(String package_name);
 
-//修改密钥
+//修改数据包密钥
 void change_secret_key(uint16_t _secret_key);
 
 
@@ -70,8 +106,10 @@ void change_secret_key(uint16_t _secret_key);
 
 
 
-
 /*↓↓↓↓定义↓↓↓↓*/
+
+//数据包密钥
+static uint16_t secret_key=DEFAULT_SECRET_KEY;
 
 //数据包格式
 struct HXC_ESPNOW_data_pakage {
@@ -123,21 +161,29 @@ struct HXC_ESPNOW_data_pakage {
 };
 
 
+static std::list<MAC_t> peer_mac_list;//配对MAC地址列表
+
 static std::map<String, callback_func> callback_map;//回调函数map
 
+//添加回调函数
 void add_esp_now_callback(String package_name,callback_func func){
   callback_map[package_name]=func;
 }
+
+//移除回调函数
 void remove_esp_now_callback(String package_name){
   callback_map.erase(package_name);
 };
 
 static HXC_ESPNOW_data_pakage re_data;//数据包缓存对象
 
+//是否连接的标志
+bool is_conect=false;
+
 //接收数据时的回调函数，收到数据时自动运行
 void OnESPNOWDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
   //检查是否是数据包
-  if(len<2) return;
+  if(len<4) return;
   if(*(uint16_t*)data!=secret_key) return;
   re_data.decode((uint8_t*)data,len);
     //检查是否是需要运行回调函数的数据包
@@ -147,12 +193,14 @@ void OnESPNOWDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
   is_conect=true;
 }
 
-
+//配对信息对象
 static esp_now_peer_info_t peerInfo;
+
+//是否初始化的标志
 static bool is_setup=false;
 
 //ESP-NOW初始化
-void esp_now_setup(uint8_t* receive_MAC,int wifi_channel){
+void esp_now_setup(MAC_t receive_MAC,int wifi_channel){
   
   if(is_setup) return;
   is_setup=true;
@@ -167,6 +215,7 @@ void esp_now_setup(uint8_t* receive_MAC,int wifi_channel){
   }
   peerInfo.ifidx = WIFI_IF_STA;
   memcpy(peerInfo.peer_addr, receive_MAC, 6);
+  peer_mac_list.push_back(receive_MAC);
   esp_now_add_peer(&peerInfo);
 
   if(receive_MAC!=broadcastMacAddress){
@@ -176,9 +225,34 @@ void esp_now_setup(uint8_t* receive_MAC,int wifi_channel){
   esp_now_register_recv_cb(OnESPNOWDataRecv);
 } 
 
+//添加配对MAC
+void add_esp_now_peer_mac(MAC_t mac){
+  memcpy(peerInfo.peer_addr, mac, 6);
+  peer_mac_list.push_back(mac);
+  esp_now_add_peer(&peerInfo);
+};
+
+//删除配对MAC
+void remove_esp_now_peer_mac(MAC_t mac){
+  peer_mac_list.remove(mac);
+  esp_now_del_peer(mac);
+};
+
+//检查是否是配对MAC
+bool is_esp_now_peer(MAC_t mac){
+
+  //检查是否是配对MAC
+  auto item=std::find(peer_mac_list.begin(),peer_mac_list.end(),mac);
+
+  //没有找到
+  if(item==peer_mac_list.end()) return false;
+
+  //找到了
+  return true;
+}
 
 //通过espnow发送数据包
-esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* receive_MAC){
+esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,MAC_t receive_MAC){
   HXC_ESPNOW_data_pakage send_data;
   send_data.add_name(name);
   send_data.add_data(data,datalen);
@@ -193,6 +267,7 @@ esp_err_t esp_now_send_package(String name,uint8_t* data,int datalen,uint8_t* re
   return ESP_FAIL;
 }
 
+//修改数据包密钥
 void change_secret_key(uint16_t _secret_key){
   secret_key=_secret_key;
 }
