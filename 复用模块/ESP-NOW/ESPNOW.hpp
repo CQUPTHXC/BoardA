@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-09 16:29:06
+ * @LastEditTime: 2024-12-10 16:30:51
  */
 
 #ifndef esp_now_hpp
@@ -30,6 +30,8 @@ struct HXC_ESPNOW_data_pakage;
 //MAC地址结构体
 struct MAC_t{
   uint8_t mac[6];
+  //默认构造函数
+  MAC_t(){memset(this->mac,0xFF,6);}
   //构造函数,从6个字节构造
   MAC_t(uint8_t mac1,uint8_t mac2,uint8_t mac3,uint8_t mac4,uint8_t mac5,uint8_t mac6){ mac[0]=mac1;mac[1]=mac2;mac[2]=mac3;mac[3]=mac4;mac[4]=mac5;mac[5]=mac6; }
   //构造函数,从数组构造
@@ -46,7 +48,7 @@ struct MAC_t{
 };
 
 //广播地址
-const MAC_t broadcastMacAddress(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF);
+MAC_t broadcastMacAddress(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF);
 
 //回调函数
 using callback_func =std::function<void(HXC_ESPNOW_data_pakage)>;
