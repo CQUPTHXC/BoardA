@@ -1,5 +1,12 @@
+/*
+ * @version: no version
+ * @LastEditors: qingmeijiupiao
+ * @Description: 
+ * @Author: qingmeijiupiao
+ * @LastEditTime: 2024-12-17 23:58:03
+ */
 #include <Arduino.h>
-#include "ESP_CAN.hpp"
+#include "HXC_TWAI.hpp"
 HXC_TWAI twai(8,18,CAN_RATE_1MBIT);
 
 //通过基类发送
