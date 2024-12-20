@@ -11,7 +11,7 @@ HXC_TWAI twai(8,18,CAN_RATE_1MBIT);
 
 //通过基类发送
 esp_err_t  base_send(HXC_CAN* canbus,HXC_CAN_message_t* message){
-    return canbus->can_send(message);
+    return canbus->send(message);
 }
 
 
@@ -54,7 +54,7 @@ void loop() {
     for (size_t i = 0; i < send_message.data_length_code; i++){
         send_message.data[i]=i;
     }
-    auto ret=twai.can_send(&send_message);
+    auto ret=twai.send(&send_message);
     Serial.println(ret==ESP_OK?"send success":"send fail");
     delay(1000);
     auto ret2=base_send(&twai,&send_message);
