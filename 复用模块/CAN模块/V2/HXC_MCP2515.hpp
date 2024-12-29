@@ -4,6 +4,13 @@
 #include <SPI.h>
 #include <Arduino.h>
 
+
+// 使用延时模式接收CAN消息
+// 延时模式:CPU占用低，但是总线数据在2000HZ以上时会丢包
+// 非延时模式:CPU占用高，但是总线数据接收速度更高
+#define USE_NONE_DELAY_RECEIVE 0
+
+// MCP2515 寄存器枚举
 enum MCP2515_REGISTER : uint8_t {
     MCP_RXF0SIDH = 0x00, // 接收过滤器0的标准标识符高字节
     MCP_RXF0SIDL = 0x01, // 接收过滤器0的标准标识符低字节
@@ -218,12 +225,27 @@ protected:
     //中断包装函数
     static void Interrupt_repakage_func(void *arg){
         HXC_MCP2515 *can=(HXC_MCP2515*)arg;
-        can->interrupt();
+        while (1){
+            if(!digitalRead(can->int_pin)){
+                can->interrupt();
+            }else{
+                
+                #if USE_NONE_DELAY_RECEIVE == 1
+                //主动让出CPU使用权方式,接收频率高时会导致CPU占用率过高
+                vPortYield();
+                #else
+                //延时方式接收,总线上超过2000HZ会丢包
+                vTaskDelay(1);
+                #endif
+            }
+        }
+        
     }
 
     //spi总线信号量
     std::map<SPIClass*,SemaphoreHandle_t> spi_semaphore;
 };
+
 
 HXC_MCP2515::HXC_MCP2515(SPIClass *_spi,uint8_t _cs_pin,uint8_t _int_pin){
     spi=_spi;
@@ -232,10 +254,12 @@ HXC_MCP2515::HXC_MCP2515(SPIClass *_spi,uint8_t _cs_pin,uint8_t _int_pin){
     
 }
 
+//spi互斥锁上锁
 void HXC_MCP2515::lock_spi(){
     xSemaphoreTake(spi_semaphore[spi],portMAX_DELAY);
 }
 
+//解锁spi总线互斥锁
 void HXC_MCP2515::unlock_spi(){
     xSemaphoreGive(spi_semaphore[spi]);
 }
@@ -247,6 +271,7 @@ esp_err_t HXC_MCP2515::setup(CAN_RATE rate){
 
     if(spi_semaphore.find(spi)==spi_semaphore.end()){
         spi_semaphore[spi]=xSemaphoreCreateMutex();//创建信号量
+        unlock_spi();
     }
     //加锁
     lock_spi();
@@ -270,8 +295,6 @@ esp_err_t HXC_MCP2515::setup(CAN_RATE rate){
 
     // 启用接收中断
     modifyRegister(MCP_CANINTE, 0x03, 0x03);  // 使能接收缓冲区 0,1 中断
-
-
 
 
     uint8_t cfg[3]={0x00,0x00,0x00};
@@ -319,14 +342,12 @@ esp_err_t HXC_MCP2515::setup(CAN_RATE rate){
     // 切换回普通模式
     modifyRegister(MCP_CANCTRL,0xE0,mode);
     
+    // 解锁
     unlock_spi();
-    // 配置中断
-    attachInterruptArg(39,Interrupt_repakage_func,this,FALLING);
-    
-    // 如果已经有中断，触发一次中断处理函数
-    if(!digitalRead(int_pin)){
-        this->interrupt();
-    }
+
+    // 注意这里优先级必须是最低否则在非延时接收时会喂不了看门狗导致重启
+    xTaskCreate(Interrupt_repakage_func,"CAN_INT",1024*2,this,0,NULL);//创建can接收任务
+    is_setup=true;//设置已初始化标志位
     return ESP_OK;
 }
 
@@ -383,6 +404,7 @@ esp_err_t HXC_MCP2515::send(HXC_CAN_message_t* msg){
         unlock_spi();
         return ESP_OK;
     }
+    unlock_spi();
     return ESP_FAIL;
     
     
@@ -539,7 +561,6 @@ void HXC_MCP2515::read_can_message(uint8_t buffer_num, HXC_CAN_message_t *msg){
 
 
 void HXC_MCP2515::interrupt(){
-
     lock_spi();
 
     uint8_t interruptFlags = getInterrupts();  // 检查中断标志
@@ -562,7 +583,7 @@ void HXC_MCP2515::interrupt(){
         }
     }
     
-    // 清除中断标志
+    // 清除中断标志s
    clearInterrupts();
 
    unlock_spi();

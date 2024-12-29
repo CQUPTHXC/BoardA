@@ -3,7 +3,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 使用MCP2515的示例
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-27 09:55:45
+ * @LastEditTime: 2024-12-29 18:39:31
  */
 #include <Arduino.h>
 #include "HXC_MCP2515.hpp"
@@ -28,8 +28,13 @@ void test2(HXC_CAN_message_t* can_message){
 };
 
 void setup() {
-    spi.setFrequency(8e7);
+    //设置spi时钟 MCP2515的标称最大时钟为10MHZ 实测40MHZ也可以正常工作
+    spi.setFrequency(1e7);
+    
+    //设置spi引脚
     spi.begin(/*SCK=*/21,/*MISO=*/48,/*MOSI*/47);
+    
+    //初始化并设置can总线速率
     CAN_BUS.setup(CAN_RATE_1MBIT);
 
     //通过函数添加回调
@@ -51,12 +56,16 @@ void setup() {
 void loop() {
     //创建发送数据结构体
     HXC_CAN_message_t send_message;
-    send_message.identifier=0x01;
-    send_message.data_length_code=8;
+    send_message.identifier=0x01;//can地址
+    send_message.extd=false;//是否扩展帧
+    send_message.data_length_code=8;//数据长度
+
     for (size_t i = 0; i < send_message.data_length_code; i++){
-        send_message.data[i]=i;
+        send_message.data[i]=i;//数据
     }
+    //发送数据
     auto ret=CAN_BUS.send(&send_message);
+    
     Serial.println(ret==ESP_OK?"send success":"send fail");
     delay(1000);
     auto ret2=base_send(&CAN_BUS,&send_message);
