@@ -7,7 +7,7 @@
 -->
 
 ## UML图
-![](DJIMotorCtrlESP.jpeg)
+![](CANclass.jpeg)
 
 ## 概述
 HXC_CAN是一个CAN通信的基类，提供了CAN消息的发送、接收和回调处理功能。
