@@ -3,8 +3,12 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-20 16:12:44
+ * @LastEditTime: 2024-12-30 14:13:04
 -->
+
+## UML图
+![](DJIMotorCtrlESP.jpeg)
+
 ## 概述
 HXC_CAN是一个CAN通信的基类，提供了CAN消息的发送、接收和回调处理功能。
 
