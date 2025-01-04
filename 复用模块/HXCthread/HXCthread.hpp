@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: HXCthread库,基于FreeRTOS实现的类似std::thread线程库 
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-11-27 15:19:53
+ * @LastEditTime: 2025-01-04 20:20:29
  */
 #ifndef HXCTHREAD_HPP
 #define HXCTHREAD_HPP
@@ -22,8 +22,12 @@
 #define DEFAULT_PRIORITY 5
 #endif
 
+#ifndef DEFAULT_TASK_NAME// 如果未定义DEFAULT_TASK_NAME
+#define DEFAULT_TASK_NAME "DEFAULTNAME"
+#endif
+
 namespace HXC {
-    template <typename ParamType>
+    template <typename ParamType = void>
     class thread {
     public:
         // 构造函数，接收一个函数对象作为参数，该函数对象将被线程执行。
@@ -39,7 +43,7 @@ namespace HXC {
          * @param {UBaseType_t} priority 线程优先级
          * @param {int} core 线程所在核心 0-1 默认运行在任意核心
          */
-        void start(ParamType parameter = {},const char *taskname="DEFAULTNAME", int stack_size = DEFAULT_STACK_SIZE, UBaseType_t priority = DEFAULT_PRIORITY, int core = tskNO_AFFINITY) {
+        void start(ParamType parameter = {},const char *taskname=DEFAULT_TASK_NAME, int stack_size = DEFAULT_STACK_SIZE, UBaseType_t priority = DEFAULT_PRIORITY, int core = tskNO_AFFINITY) {
             if (this->threadHandle == nullptr) { // 如果线程句柄为空，则创建新线程。
                 this->funcparam = parameter; // 保存参数
                 xTaskCreatePinnedToCore( // 创建一个指定核心的线程
@@ -128,7 +132,6 @@ namespace HXC {
     class thread<void> {
     public:
 
-
         // 构造函数，接收一个无参数的函数对象。
         thread(std::function<void()> _func) : func(_func) {}
 
@@ -141,7 +144,7 @@ namespace HXC {
          * @param {UBaseType_t} priority 线程优先级
          * @param {int} core 线程所在核心 0-1 默认运行在任意核心
          */
-        void start(const char *taskname, int stack_size = DEFAULT_STACK_SIZE, UBaseType_t priority = DEFAULT_PRIORITY, int core = tskNO_AFFINITY) {
+        void start(const char *taskname=DEFAULT_TASK_NAME, int stack_size = DEFAULT_STACK_SIZE, UBaseType_t priority = DEFAULT_PRIORITY, int core = tskNO_AFFINITY) {
             if (this->threadHandle == nullptr) {
                 xTaskCreatePinnedToCore(
                     TaskWrapper,
@@ -165,7 +168,13 @@ namespace HXC {
                 vTaskDelay(1/ portTICK_PERIOD_MS); // 延迟一个tick周期，避免忙等。
             }
         }
-        #ifdef INCLUDE_uxTaskGetStackHighWaterMark//获取是否启用该函数
+        void stop(){ // 停止线程
+            if (this->threadHandle != nullptr) { // 如果线程句柄不为空，则删除线程。
+                vTaskDelete(this->threadHandle); // 删除线程
+                this->threadHandle = nullptr; // 清空线程句柄
+            }
+        }
+        #ifdef INCLUDE_uxTaskGetStackHighWaterMark//获取是否启用该函数s
         /**
          * @brief 获取线程的剩余栈大小
          * 
