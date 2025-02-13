@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 重庆邮电大学HXC战队ESP-NOW二次封装库,指定了发包格式
  * @Author: qingmeijiupiao
- * @LastEditTime: 2024-12-10 16:30:51
+ * @LastEditTime: 2025-02-13 13:49:54
  */
 
 #ifndef esp_now_hpp
@@ -207,7 +207,10 @@ void esp_now_setup(MAC_t receive_MAC,int wifi_channel){
   if(is_setup) return;
   is_setup=true;
 
-  WiFi.mode(WIFI_STA);
+  if(WiFi.getMode()==WIFI_MODE_NULL){
+    WiFi.mode(WIFI_STA);
+  }
+  
   if (esp_now_init() != ESP_OK) {
       Serial.println("ESP-NOW initialization failed");
       return;
