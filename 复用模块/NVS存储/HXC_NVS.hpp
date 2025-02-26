@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: HXC战队nvs储存系统二次封装库，用于储存变量到NVS
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-19 17:08:29
+ * @LastEditTime: 2025-02-26 18:21:25
  */
 #ifndef HXC_NVS_HPP
 #define HXC_NVS_HPP
@@ -38,6 +38,10 @@ class NVS_DATA: public NVS_Base {
 public:
     // 构造函数，初始化key和默认值
     NVS_DATA(String _key,Value_type default_value){
+        static_assert(
+            !std::is_pointer<Value_type>::value,
+            "NVS_DATA<Value_type>:Cannot use pointer type!"
+        );
         if(_key.length()>15){
             log_e("nvs key too long: %s", key.c_str());
             _key=_key.substring(0,15);
@@ -186,7 +190,6 @@ protected:
     String key; // 存储NVS中的key
     String value; // 存储数据的值
     bool is_read=false;//标记是否已读取
-};
 };
 #endif
 /*
