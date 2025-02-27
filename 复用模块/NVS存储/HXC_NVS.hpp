@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: HXC战队nvs储存系统二次封装库，用于储存变量到NVS
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-26 18:23:03
+ * @LastEditTime: 2025-02-27 22:49:41
  */
 #ifndef HXC_NVS_HPP
 #define HXC_NVS_HPP
