@@ -68,8 +68,18 @@ float current_value = my_float;
 ```
 my_float_name:3.14
 ```
+### 6. 回调功能
+```cpp
+void onParamChange(String name, float value) {
+    Serial.printf("参数 %s 已更新为: %.2f\n", name.c_str(), value);
+}
 
-### 6. 示例代码
+void setup() {
+    // ...其他初始化...
+    VOFA_float::add_on_value_change_callback(onParamChange);
+}
+```
+### 7. 示例代码
 
 ```cpp
 #include "VOFA.hpp"

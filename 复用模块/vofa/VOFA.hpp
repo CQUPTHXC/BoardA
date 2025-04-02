@@ -2,6 +2,7 @@
 #define VOFA_HPP
 #include "Arduino.h"
 #include <map>
+#include <list>
 class VOFA_float{
     public:
     VOFA_float(String _name,float default_value){
@@ -22,10 +23,14 @@ class VOFA_float{
         return value;
     }
 
+    static void add_on_value_change_callback(std::function<void(String,float)> callback){
+        on_value_change_callback_list.push_back(callback);
+    }
     protected:
     float value;
     String name;
     static std::map<String, VOFA_float*>name_to_value_map;
+    static std::list<std::function<void(String,float)>>on_value_change_callback_list;
     static bool is_setup;
     static void read_loop(void* p){
         while(1){
@@ -38,12 +43,21 @@ class VOFA_float{
                 }else{
                     Serial.println("VOFA_float: "+name+" not found");
                 }
+                if(on_value_change_callback_list.size()!=0){
+                    for(std::function<void(String,float)> callback:on_value_change_callback_list){
+                        callback(name,value);
+                    }
+                };
+
             }
             delay(1);
         }
 
     };
+    
 };
 bool VOFA_float::is_setup=false;
 std::map<String, VOFA_float*>VOFA_float::name_to_value_map;
+std::list<std::function<void(String,float)>>VOFA_float::on_value_change_callback_list;
+
 #endif
