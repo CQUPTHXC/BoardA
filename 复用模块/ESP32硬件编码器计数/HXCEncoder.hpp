@@ -6,6 +6,7 @@
  */
 #ifndef HXCPCNTENCODER_HPP
 #define HXCPCNTENCODER_HPP
+#include <Arduino.h>
 #include "driver/pcnt.h"
 namespace HXC{
 
