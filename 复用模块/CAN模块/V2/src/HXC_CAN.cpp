@@ -9,18 +9,18 @@ HXC_CAN::HXC_CAN() : is_setup(false), can_rate(CAN_RATE_1MBIT) {}
 HXC_CAN::~HXC_CAN() {}
 
 // 初始化函数
-esp_err_t HXC_CAN::setup(CAN_RATE can_rate) {
-    return ESP_FAIL; //不应该调用基类的setup函数
+hxc_err_t HXC_CAN::setup(CAN_RATE can_rate) {
+    return HXC_FAIL; //不应该调用基类的setup函数
 }
 
 // 发送CAN消息函数，接收消息指针作为参数
-esp_err_t HXC_CAN::send(HXC_CAN_message_t* message) {
-    return ESP_FAIL; //不应该调用基类的send函数
+hxc_err_t HXC_CAN::send(HXC_CAN_message_t* message) {
+    return HXC_FAIL; //不应该调用基类的send函数
 }
 
 // 发送CAN消息函数，接收CAN消息对象作为参数
-esp_err_t HXC_CAN::send(HXC_CAN_message_t message) {
-    return ESP_FAIL; //不应该调用基类的send函数
+hxc_err_t HXC_CAN::send(HXC_CAN_message_t message) {
+    return HXC_FAIL; //不应该调用基类的send函数
 }
 
 // 添加CAN消息接收回调函数
