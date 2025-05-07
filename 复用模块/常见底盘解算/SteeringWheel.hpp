@@ -3,7 +3,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 三，四舵轮运动学逆解算封装库
  * @author: qingmeijiupiao
- * @LastEditTime: 2025-05-06 10:18:41
+ * @LastEditTime: 2025-05-07 09:42:36
  */
 #ifndef SteeringWheel_hpp
 #define SteeringWheel_hpp
@@ -94,9 +94,9 @@ class SteeringWheel_3{
             wheel3_vector = wheel3_vector.normalized();
 
             //计算每个舵轮的旋转速度矢量
-            wheel1_vector=wheel1_vector*wheel1_vector_length;
-            wheel2_vector=wheel2_vector*wheel2_vector_length;
-            wheel3_vector=wheel3_vector*wheel3_vector_length;
+            wheel1_vector=wheel1_vector*wheel1_vector_length*speed_vector.z;
+            wheel2_vector=wheel2_vector*wheel2_vector_length*speed_vector.z;
+            wheel3_vector=wheel3_vector*wheel3_vector_length*speed_vector.z;
 
             //加上平面速度矢量
             wheel1_vector = wheel1_vector + speed1;
