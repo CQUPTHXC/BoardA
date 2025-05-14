@@ -2,7 +2,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: HXC战队nvs储存系统二次封装库，用于储存变量到NVS
  * @Author: qingmeijiupiao
- * @LastEditTime: 2025-02-27 22:49:41
+ * @LastEditTime: 2025-05-15 02:36:57
  */
 #ifndef HXC_NVS_HPP
 #define HXC_NVS_HPP
@@ -20,7 +20,7 @@ static const char * nvs_errors[] = { "OTHER", "NOT_INITIALIZED", "NOT_FOUND", "T
 #define nvs_error(e) (((e)>ESP_ERR_NVS_BASE)?nvs_errors[(e)&~(ESP_ERR_NVS_BASE)]:nvs_errors[0])
 
 //默认使用的NVS page名称
-#define NVS_NAME "HXC_ESPNOW"
+#define NVS_NAME "HXC"
 
 
 // 基类，用于共享静态变量,解决String模板特化静态变量不同的问题
