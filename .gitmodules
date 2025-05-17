@@ -1,0 +1,3 @@
+[submodule "复用模块/DJIMotorCtrlESP"]
+	path = 复用模块/DJIMotorCtrlESP
+	url = https://github.com/CQUPTHXC/DJIMotorCtrlESP
