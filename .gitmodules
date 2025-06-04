@@ -1,6 +1,6 @@
-[submodule "复用模块/DJIMotorCtrlESP"]
-	path = 复用模块/DJIMotorCtrlESP
+[submodule "mudule/DJIMotorCtrlESP"]
+	path = mudule/DJIMotorCtrlESP
 	url = https://github.com/CQUPTHXC/DJIMotorCtrlESP.git
-[submodule "复用模块/DMMotorCtrl"]
-	path = 复用模块/DMMotorCtrl
+[submodule "mudule/DMMotorCtrl"]
+	path = mudule/DMMotorCtrl
 	url = https://github.com/CQUPTHXC/DMMotorCtrl
