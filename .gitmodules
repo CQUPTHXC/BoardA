@@ -7,3 +7,9 @@
 [submodule "module/HXC_CAN"]
 	path = module/HXC_CAN
 	url = https://github.com/CQUPTHXC/HXC_CAN
+[submodule "/module/HXC_CAN"]
+	branch = main
+[submodule "/module/DJIMotorCtrl"]
+	branch = main
+[submodule "/module/DMMotorCtrl"]
+	branch = main
