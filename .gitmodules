@@ -4,6 +4,6 @@
 [submodule "module/DJIMotorCtrl"]
 	path = module/DJIMotorCtrl
 	url = https://github.com/CQUPTHXC/DJIMotorCtrlESP
-[submodule "module/CAN"]
-	path = module/CAN
+[submodule "module/HXC_CAN"]
+	path = module/HXC_CAN
 	url = https://github.com/CQUPTHXC/HXC_CAN
