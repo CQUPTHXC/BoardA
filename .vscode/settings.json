@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "functional": "cpp"
+    }
+}

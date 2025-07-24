@@ -3,7 +3,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 通用舵轮运动学逆解算封装库声明（支持2轮及以上）
  * @author: qingmeijiupiao
- * @LastEditTime: 2025-05-10 16:45:10
+ * @LastEditTime: 2025-07-24 11:49:49
  */
 #ifndef STEERING_WHEEL_CHASSIS_HPP
 #define STEERING_WHEEL_CHASSIS_HPP
@@ -44,7 +44,7 @@ public:
      * @param [std::array<vec3<float>, N>] args N个vec3<float>类型的舵轮位置参数，单位：米(m)
      */
 
-    SteeringWheelChassis(vec3<float> _rotation_center, const std::array<vec3<float>, N>& _wheel_positions):
+    SteeringWheelChassis(vec2<float> _rotation_center, const std::array<vec2<float>, N>& _wheel_positions):
         rotation_center_vector(_rotation_center), wheel_positions(_wheel_positions) {
         for (auto& w : wheel_module_speed_angle) {
             w.speed = 0;
@@ -166,8 +166,8 @@ public:
     };
 
 protected:
-    std::array<vec3<float>, N> wheel_positions; ///< 各舵轮位置坐标数组
-    vec3<float> rotation_center_vector;         ///< 当前旋转中心坐标
+    std::array<vec2<float>, N> wheel_positions; ///< 各舵轮位置坐标数组
+    vec2<float> rotation_center_vector;         ///< 当前旋转中心坐标
     
     /// 零点速度回调函数（默认为nullptr）
     std::function<std::array<WheelModule, N>(SteeringWheelChassis<N>*)> zero_point_callback = nullptr;
@@ -179,20 +179,20 @@ protected:
 // 3轮舵轮底盘
 class SteeringWheelChassis3 : public SteeringWheelChassis<3> {
 public:
-    SteeringWheelChassis3(vec3<float> rotation_center, 
-                         vec3<float> wheel1, 
-                         vec3<float> wheel2, 
-                         vec3<float> wheel3):SteeringWheelChassis<3>(rotation_center,{wheel1,wheel2,wheel3}){};
+    SteeringWheelChassis3(vec2<float> rotation_center, 
+                         vec2<float> wheel1, 
+                         vec2<float> wheel2, 
+                         vec2<float> wheel3):SteeringWheelChassis<3>(rotation_center,{wheel1,wheel2,wheel3}){};
 };
 
 // 4轮舵轮底盘
 class SteeringWheelChassis4 : public SteeringWheelChassis<4> {
 public:
-    SteeringWheelChassis4(vec3<float> rotation_center, 
-                         vec3<float> wheel1, 
-                         vec3<float> wheel2, 
-                         vec3<float> wheel3,
-                         vec3<float> wheel4):SteeringWheelChassis<4>(rotation_center,{wheel1,wheel2,wheel3,wheel4}){};
+    SteeringWheelChassis4(vec2<float> rotation_center, 
+                         vec2<float> wheel1, 
+                         vec2<float> wheel2, 
+                         vec2<float> wheel3,
+                         vec2<float> wheel4):SteeringWheelChassis<4>(rotation_center,{wheel1,wheel2,wheel3,wheel4}){};
 };
 
 #endif // STEERING_WHEEL_CHASSIS_HPP
