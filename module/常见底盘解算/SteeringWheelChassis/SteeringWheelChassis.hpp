@@ -3,7 +3,7 @@
  * @LastEditors: qingmeijiupiao
  * @Description: 通用舵轮运动学逆解算封装库声明（支持2轮及以上）
  * @author: qingmeijiupiao
- * @LastEditTime: 2025-07-24 11:49:49
+ * @LastEditTime: 2025-07-26 00:16:04
  */
 #ifndef STEERING_WHEEL_CHASSIS_HPP
 #define STEERING_WHEEL_CHASSIS_HPP
@@ -140,17 +140,17 @@ public:
      * @return vec3<float> 舵轮位置坐标
      * @throws 无异常，但输入无效编号时返回(0,0,0)
      */
-    vec3<float> get_wheel_position(size_t wheel_number) const{
+    vec2<float> get_wheel_position(size_t wheel_number) const{
         if (wheel_number > 0 && wheel_number <= N) {
             return wheel_positions[wheel_number - 1];
         }
-        return vec3<float>(0, 0, 0);
+        return vec2<float>(0, 0);
     };
     
     /**
      * @brief 获取当前旋转中心坐标
      */
-    vec3<float> get_rotation_center() const{
+    vec2<float> get_rotation_center() const{
         return rotation_center_vector;
     };
     
@@ -161,7 +161,7 @@ public:
      * 
      * @note 修改后立即生效，会影响后续所有速度计算
      */
-    void change_rotation_center(vec3<float> rotation_center){
+    void change_rotation_center(vec2<float> rotation_center){
         rotation_center_vector = rotation_center;
     };
 

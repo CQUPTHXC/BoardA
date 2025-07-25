@@ -59,7 +59,12 @@ public:
     
     // 构造函数
     vec3(T _x = 0, T _y = 0, T _z = 0) : vec2<T>(_x, _y), z(_z) {}
-    
+    // 从 vec2 构造，z 默认为 0
+    vec3(const vec2<T>& v2){
+        this->x = v2.x;
+        this->y = v2.y;
+        z = 0;
+    }
     // 向量加法
     vec3<T> operator+(const vec3<T>& other) const {
         return vec3<T>(this->x + other.x, this->y + other.y, z + other.z);
